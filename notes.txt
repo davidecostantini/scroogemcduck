@@ -1,0 +1,9 @@
+#
+#Encryption using openssl
+#
+
+#Encrypt
+#tar -zcf - /tmp/load_folder | openssl aes-256-cbc -k password -out test.tgz
+
+#Decrypt
+#openssl aes-256-cbc -d -salt -in test.tgz  | tar -xz -f -

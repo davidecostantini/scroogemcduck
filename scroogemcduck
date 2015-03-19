@@ -1,0 +1,72 @@
+#!/bin/sh
+
+#############################################
+#########BACKUP SCRIPT - DO NOT EDIT#########
+#############################################
+SOURCE_FOLDER="$1"
+DEST_FOLDER="$2"
+RETANTION_DAYS="$3"
+PWD="$4"
+
+print_message () {
+	echo "[$HOSTNAME] $(date +'%d-%m-%Y %H-%M') - $1"
+}
+
+check_existance () {
+	print_message "Check existance of $1"
+	if [[ -z "$1" ]]; then
+	    echo "The directory $1 doesn't exist"
+	    exit 1
+	fi
+}
+
+check_if_encrypt_req () {
+	if [ ! -z "$PWD" ]; then
+		ENCRYPTION="aes-256-cbc"
+		print_message "Encryption requested!"
+	fi
+}
+
+makearchive () {
+	archive_name="$(date +'%d-%m-%Y_%H-%M')_$HOSTNAME"
+
+	if [ ! -z "$ENCRYPTION" ]; then
+		message="$message ENCRYPTED"
+	else
+		archive_name="$archive_name.tgz"		
+	fi
+	
+	message="Making $archive_name"
+	print_message "$message"
+	
+	if [ ! -z "$ENCRYPTION" ]; then
+		tar -zcf - $SOURCE_FOLDER | openssl $ENCRYPTION -k $PWD -out $DEST_FOLDER/$archive_name
+	else
+		tar -zcf $DEST_FOLDER/$archive_name $SOURCE_FOLDER
+	fi
+}
+
+remove_old_backups () {
+	print_message "Removing backups older than $2 days"
+	find $DEST_FOLDER -mtime +$RETANTION_DAYS -exec rm {} \;
+}
+#############################################
+
+print_message "Start backup"
+
+#Check PWD
+check_if_encrypt_req
+
+#Check source SOURCE_FOLDER
+check_existance $SOURCE_FOLDER
+
+#Check source DEST_FOLDER
+check_existance $DEST_FOLDER
+
+#Backup
+makearchive
+
+#Flush old backups
+remove_old_backups $DEST_FOLDER $RETANTION_DAYS
+
+print_message "End script"
