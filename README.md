@@ -24,3 +24,7 @@ Non encrypted backup
 Encrypted backup
 
 	./scroogemcduck /u04/oracle/backups /storage/backup 15 supersecurepwd
+
+
+**NOTE**
+The image and his rights belong to his owner
